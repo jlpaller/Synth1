@@ -1,0 +1,14 @@
+# build files #
+###############
+*.exe
+*.app
+*.vst3
+*.dll
+*.component
+*.a
+
+
+# folders #
+###########
+Builds/
+JuceLibraryCode/
