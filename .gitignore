@@ -7,6 +7,8 @@
 *.component
 *.a
 
+*.DS_Store
+
 
 # folders #
 ###########
