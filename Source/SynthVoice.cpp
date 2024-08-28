@@ -93,10 +93,12 @@ void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int 
     juce::dsp::AudioBlock<float> audioBlock2 {osc2buffer};
     osc1.getNextAudioBlock(audioBlock1);
     osc2.getNextAudioBlock(audioBlock2);
-    osc1AmpEnv.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
-    osc2AmpEnv.applyEnvelopeToBuffer(osc2buffer, 0, osc2buffer.getNumSamples());
+
     gain1.process(juce::dsp::ProcessContextReplacing<float>(audioBlock1));
     gain2.process(juce::dsp::ProcessContextReplacing<float>(audioBlock2));
+    
+    osc1AmpEnv.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+    osc2AmpEnv.applyEnvelopeToBuffer(osc2buffer, 0, osc2buffer.getNumSamples());
     
     audioBlock1.add(audioBlock2);
     

@@ -65,7 +65,7 @@ void Synth1AudioProcessorEditor::resized()
     //row 2
     filter.setBounds(paddingX, paddingY2, moduleWidth, moduleHeight);
     filterAdsr.setBounds(filter.getRight(), paddingY2, moduleWidth, moduleHeight);
-    volume.setBounds(filterAdsr.getRight(), paddingY2, moduleWidth/4, moduleHeight);
+    volume.setBounds(filterAdsr.getRight(), paddingY2, moduleWidth/3, moduleHeight);
 
 }
 

@@ -30,7 +30,7 @@ void VolumeComponent::resized()
     const auto padding = 10;
     const auto sliderWidth = bounds.getWidth();
     const auto sliderHeight = bounds.getHeight() - 45;
-    const auto sliderStartX = padding + 5;
+    const auto sliderStartX = padding;
     const auto sliderStartY = 55;
     const auto labelYOffset = 20;
     const auto labelHeight = 20;
