@@ -13,6 +13,12 @@
         <FILE id="KhgwuE" name="OscData.h" compile="0" resource="0" file="Source/OscData.h"/>
       </GROUP>
       <GROUP id="{D6FB06A2-D425-A841-1302-9E71E58847CB}" name="UI">
+        <FILE id="FaTYSa" name="VolumeComponent.cpp" compile="1" resource="0"
+              file="Source/VolumeComponent.cpp"/>
+        <FILE id="V6FBJh" name="VolumeComponent.h" compile="0" resource="0"
+              file="Source/VolumeComponent.h"/>
+        <FILE id="jG3o75" name="ARComponent.cpp" compile="1" resource="0" file="Source/ARComponent.cpp"/>
+        <FILE id="Ulgpn2" name="ARComponent.h" compile="0" resource="0" file="Source/ARComponent.h"/>
         <FILE id="j3KvdF" name="Synth1Component.cpp" compile="1" resource="0"
               file="Source/Synth1Component.cpp"/>
         <FILE id="VECia8" name="Synth1Component.h" compile="0" resource="0"

@@ -20,3 +20,12 @@ public:
 private:
     juce::ADSR::Parameters AdsrParams;
 };
+
+class ARData : public juce::ADSR
+{
+public:
+    void updateAR(float attack, float release);
+    
+private:
+    juce::ADSR::Parameters AdsrParams;
+};

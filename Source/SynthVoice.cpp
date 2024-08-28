@@ -21,16 +21,18 @@ void SynthVoice::startNote (int midiNoteNumber, float velocity, juce::Synthesise
     osc1.setNote(midiNoteNumber);
     osc2.setNote(midiNoteNumber);
 
-    ampAdsr.noteOn();
+    osc1AmpEnv.noteOn();
+    osc2AmpEnv.noteOn();
+    //ampAdsr.noteOn();
     filterAdsr.noteOn();
 }
 
 void SynthVoice::stopNote (float velocity, bool allowTailOff)
 {
-    ampAdsr.noteOff();
+    //ampAdsr.noteOff();
     filterAdsr.noteOff();
     
-    if (! allowTailOff || ! ampAdsr.isActive() || ! filterAdsr.isActive())
+    if (! allowTailOff || ( ! osc1AmpEnv.isActive() && ! osc2AmpEnv.isActive() ) || ! filterAdsr.isActive())
         clearCurrentNote();
 }
 
@@ -54,11 +56,18 @@ void SynthVoice::prepareToPlay (double sampleRate, int samplesPerBlock, int outp
     
     osc1.prepareToPlay(spec);
     osc2.prepareToPlay(spec);
-    ampAdsr.setSampleRate(sampleRate);
+    osc1AmpEnv.setSampleRate(sampleRate);
+    osc2AmpEnv.setSampleRate(sampleRate);
+    //ampAdsr.setSampleRate(sampleRate);
     filter.prepareToPlay(sampleRate, samplesPerBlock, outputChannels);
     filterAdsr.setSampleRate(sampleRate);
-    gain.prepare(spec);
-    gain.setGainLinear(0.2f);
+    gain1.prepare(spec);
+    gain2.prepare(spec);
+    outputGain.prepare(spec);
+
+    gain1.setGainLinear(1.0f);
+    gain2.setGainLinear(1.0f);    
+    outputGain.setGainLinear(0.2f);
         
     isPrepared = true;
 }
@@ -72,30 +81,43 @@ void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int 
         return;
         
     synthBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+    osc2buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+
     //this next line just activates the filter adsr. doesn't actually do anything to the buffer
     filterAdsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
     synthBuffer.clear();
+    osc2buffer.clear();
     
-    juce::dsp::AudioBlock<float> audioBlock {synthBuffer};
-    osc1.getNextAudioBlock(audioBlock);
-    osc2.getNextAudioBlock(audioBlock);
-    ampAdsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+    //creat buffers for each oscillator, then combine into one audio buffer
+    juce::dsp::AudioBlock<float> audioBlock1 {synthBuffer};
+    juce::dsp::AudioBlock<float> audioBlock2 {osc2buffer};
+    osc1.getNextAudioBlock(audioBlock1);
+    osc2.getNextAudioBlock(audioBlock2);
+    osc1AmpEnv.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+    osc2AmpEnv.applyEnvelopeToBuffer(osc2buffer, 0, osc2buffer.getNumSamples());
+    gain1.process(juce::dsp::ProcessContextReplacing<float>(audioBlock1));
+    gain2.process(juce::dsp::ProcessContextReplacing<float>(audioBlock2));
+    
+    audioBlock1.add(audioBlock2);
+    
+    //ampAdsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
     filter.process(synthBuffer);
-    gain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock));
+    outputGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock1));
         
     for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
     {
         outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
         
-        if (! ampAdsr.isActive())
+        if (! osc1AmpEnv.isActive() && ! osc2AmpEnv.isActive())
             clearCurrentNote();
     }
     
 }
 
-void SynthVoice::updateADSR(const float attack, const float decay, const float sustain, const float release)
+void SynthVoice::updateAmpEnv(const float attack1, const float release1, const float attack2, const float release2)
 {
-    ampAdsr.updateADSR(attack, decay, sustain, release);
+    osc1AmpEnv.updateAR(attack1, release1);
+    osc2AmpEnv.updateAR(attack2, release2);
 }
 
 void SynthVoice::updateFilter(const int filterType, const float cutoff, const float resonance)
@@ -108,3 +130,11 @@ void SynthVoice::updateFilterADSR(const float attack, const float decay, const f
 {
     filterAdsr.updateADSR(attack, decay, sustain, release);
 }
+
+void SynthVoice::updateGains(const float gain1Val, const float gain2Val, const float outputGainVal)
+{
+    gain1.setGainLinear(gain1Val);
+    gain2.setGainLinear(gain2Val);
+    outputGain.setGainLinear(outputGainVal);
+}
+

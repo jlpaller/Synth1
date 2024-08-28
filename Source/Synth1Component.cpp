@@ -25,22 +25,15 @@ Synth1Component::~Synth1Component()
 
 void Synth1Component::paint (juce::Graphics& g)
 {
-    /* This demo code just fills the component's background and
-       draws some placeholder text to get you started.
-
-       You should replace everything in this method with your own
-       drawing code..
-    */
-
-    g.fillAll (getLookAndFeel().findColour (juce::ResizableWindow::backgroundColourId));   // clear the background
-
-    g.setColour (juce::Colours::grey);
-    g.drawRect (getLocalBounds(), 1);   // draw an outline around the component
-
-    g.setColour (juce::Colours::white);
-    g.setFont (juce::FontOptions (14.0f));
-    g.drawText ("Synth1Component", getLocalBounds(),
-                juce::Justification::centred, true);   // draw some placeholder text
+    auto bounds = getLocalBounds().reduced(5, 5);
+    auto labelSpace = bounds.removeFromTop(25.0f);
+    
+    g.fillAll (juce::Colours::black);
+    g.setColour(juce::Colours::white);
+    g.setFont(20.0f);
+    g.drawText(moduleName, labelSpace.withX(5), juce::Justification::left);
+    g.drawRoundedRectangle(bounds.toFloat(), 5.0f, 2.0f);
+    
 }
 
 void Synth1Component::resized()
@@ -51,9 +44,9 @@ void Synth1Component::resized()
 }
 
 using SliderAttachment = juce::AudioProcessorValueTreeState::SliderAttachment;
-void Synth1Component::setSliderWithLabel(juce::Slider& slider, juce::Label& label, juce::AudioProcessorValueTreeState& valueTree, juce::String paramId, std::unique_ptr<SliderAttachment>& attachment)
+void Synth1Component::setSliderWithLabel(juce::Slider& slider, juce::Label& label, juce::AudioProcessorValueTreeState& valueTree, juce::String paramId, std::unique_ptr<SliderAttachment>& attachment, juce::Slider::SliderStyle sliderStyle)
 {
-    slider.setSliderStyle(juce::Slider::SliderStyle::RotaryHorizontalVerticalDrag);
+    slider.setSliderStyle(sliderStyle);
     slider.setTextBoxStyle(juce::Slider::TextBoxBelow, true, 0, 0);
     addAndMakeVisible(slider);
     

@@ -27,9 +27,10 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock, int outputChannels);
     void renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int startSample, int numSamples) override;
     
-    void updateADSR(float attack, float decay, float sustain, float release);
+    void updateAmpEnv(const float attack1, const float release1, const float attack2, const float release2);
     void updateFilter(const int filterType, const float cutoff, const float resonance);
     void updateFilterADSR(float attack, float decay, float sustain, float release);
+    void updateGains(const float gain1, const float gain2, const float outputGain);
     
     OscData& getOscillator1() { return osc1; }
     OscData& getOscillator2() { return osc2; }
@@ -37,18 +38,21 @@ public:
     
 private:
     juce::AudioBuffer<float> synthBuffer;
+    juce::AudioBuffer<float> osc2buffer;
     
     OscData osc1;
     OscData osc2;
-    AdsrData ampAdsr;
+    ARData osc1AmpEnv;
+    ARData osc2AmpEnv;
+    //AdsrData ampAdsr;
+
+    juce::dsp::Gain<float> gain1;
+    juce::dsp::Gain<float> gain2;
+    
     FilterData filter;
     AdsrData filterAdsr;
-    
-    juce::dsp::Gain<float> gain;
+
+    juce::dsp::Gain<float> outputGain;
     
     bool isPrepared {false};
-
-
-   
-    
 };

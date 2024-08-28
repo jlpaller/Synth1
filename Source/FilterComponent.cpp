@@ -14,6 +14,10 @@
 //==============================================================================
 FilterComponent::FilterComponent(juce::AudioProcessorValueTreeState& valueTree, juce::String filterTypeId, juce::String filterCutoffId, juce::String filterResonanceId)
 {
+    
+    moduleName = "Filter";
+
+    
     setSliderWithLabel(filterCutoffSlider, filterCutoffLabel, valueTree, filterCutoffId, filterCutoffAttachment);
     setSliderWithLabel(filterResonanceSlider, filterResonanceLabel, valueTree, filterResonanceId, filterResonanceAttachment);
     setComboBoxWithLabel(filterTypeComboBox, filterTypeLabel, valueTree, filterTypeId, filterTypeAttachment, {"Low-Pass", "Band-Pass", "High-Pass"});
@@ -24,17 +28,7 @@ FilterComponent::~FilterComponent()
 {
 }
 
-void FilterComponent::paint (juce::Graphics& g)
-{
-    auto bounds = getLocalBounds().reduced(5, 5);
-    auto labelSpace = bounds.removeFromTop(25.0f);
-    
-    g.fillAll(juce::Colours::black);
-    g.setColour(juce::Colours::white);
-    g.setFont(20.0f);
-    g.drawText("Filter", labelSpace.withX(5), juce::Justification::left);
-    g.drawRoundedRectangle(bounds.toFloat(), 5.0f, 2.0f);
-}
+
 
 void FilterComponent::resized()
 {

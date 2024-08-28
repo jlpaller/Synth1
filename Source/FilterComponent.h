@@ -23,7 +23,6 @@ public:
     FilterComponent(juce::AudioProcessorValueTreeState& valueTree, juce::String filterTypeId, juce::String filterCutoffId, juce::String filterResonanceId);
     ~FilterComponent() override;
 
-    void paint (juce::Graphics&) override;
     void resized() override;
 
 private:

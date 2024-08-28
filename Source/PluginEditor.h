@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    This file contains the basic framework code for a JUCE plugin editor.
+    This file contains the plugin UI components.
 
   ==============================================================================
 */
@@ -13,6 +13,8 @@
 #include "AdsrComponent.h"
 #include "OscComponent.h"
 #include "FilterComponent.h"
+#include "ARComponent.h"
+#include "VolumeComponent.h"
 
 //==============================================================================
 /**
@@ -31,9 +33,12 @@ private:
     Synth1AudioProcessor& audioProcessor;
     OscComponent osc1;
     OscComponent osc2;
-    AdsrComponent adsr;
+    //AdsrComponent adsr;
+    ARComponent osc1Env;
+    ARComponent osc2Env;
     FilterComponent filter;
     AdsrComponent filterAdsr;
+    VolumeComponent volume;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (Synth1AudioProcessorEditor)
 };

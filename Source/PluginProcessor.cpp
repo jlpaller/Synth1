@@ -165,16 +165,22 @@ void Synth1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             auto& osc1PW = *valueTree.getRawParameterValue(juce::StringRef("OSC1_PW"));
             auto& osc1Tune = *valueTree.getRawParameterValue(juce::StringRef("OSC1_TUNE"));
             auto& osc1Fine = *valueTree.getRawParameterValue(juce::StringRef("OSC1_FINE"));
+            auto& osc1A = *valueTree.getRawParameterValue(juce::StringRef("OSC1_ATTACK"));
+            auto& osc1R = *valueTree.getRawParameterValue(juce::StringRef("OSC1_RELEASE"));
+            auto& osc1Gain = *valueTree.getRawParameterValue(juce::StringRef("OSC1_GAIN"));
 
             auto& osc2Wave = *valueTree.getRawParameterValue(juce::StringRef("OSC2_WAVE"));
             auto& osc2PW = *valueTree.getRawParameterValue(juce::StringRef("OSC2_PW"));
             auto& osc2Tune = *valueTree.getRawParameterValue(juce::StringRef("OSC2_TUNE"));
             auto& osc2Fine = *valueTree.getRawParameterValue(juce::StringRef("OSC2_FINE"));
+            auto& osc2A = *valueTree.getRawParameterValue(juce::StringRef("OSC2_ATTACK"));
+            auto& osc2R = *valueTree.getRawParameterValue(juce::StringRef("OSC2_RELEASE"));
+            auto& osc2Gain = *valueTree.getRawParameterValue(juce::StringRef("OSC2_GAIN"));
 
-            auto& ampAttack = *valueTree.getRawParameterValue(juce::StringRef("AMP_ATTACK"));
-            auto& ampDecay = *valueTree.getRawParameterValue(juce::StringRef("AMP_DECAY"));
-            auto& ampSustain = *valueTree.getRawParameterValue(juce::StringRef("AMP_SUSTAIN"));
-            auto& ampRelease = *valueTree.getRawParameterValue(juce::StringRef("AMP_RELEASE"));
+//            auto& ampAttack = *valueTree.getRawParameterValue(juce::StringRef("AMP_ATTACK"));
+//            auto& ampDecay = *valueTree.getRawParameterValue(juce::StringRef("AMP_DECAY"));
+//            auto& ampSustain = *valueTree.getRawParameterValue(juce::StringRef("AMP_SUSTAIN"));
+//            auto& ampRelease = *valueTree.getRawParameterValue(juce::StringRef("AMP_RELEASE"));
             
             auto& filterType = *valueTree.getRawParameterValue(juce::StringRef("FILTER_TYPE"));
             auto& filterCutoff = *valueTree.getRawParameterValue(juce::StringRef("FILTER_CUTOFF"));
@@ -184,14 +190,17 @@ void Synth1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             auto& filterDecay = *valueTree.getRawParameterValue(juce::StringRef("FILTER_DECAY"));
             auto& filterSustain = *valueTree.getRawParameterValue(juce::StringRef("FILTER_SUSTAIN"));
             auto& filterRelease = *valueTree.getRawParameterValue(juce::StringRef("FILTER_RELEASE"));
+            auto& outputVolume = *valueTree.getRawParameterValue(juce::StringRef("VOLUME"));
  
-            voice->getOscillator1().setWaveType(osc1Wave, osc1PW);
-            voice->getOscillator1().setTuning(osc1Tune, osc1Fine);
-            voice->getOscillator2().setWaveType(osc2Wave, osc2PW);
-            voice->getOscillator2().setTuning(osc2Tune, osc2Fine);
-            voice->updateADSR(ampAttack.load(), ampDecay.load(), ampSustain.load(), ampRelease.load());
+            voice->getOscillator1().setWaveType(osc1Wave.load(), osc1PW.load());
+            voice->getOscillator1().setTuning(osc1Tune.load(), osc1Fine.load());
+            voice->getOscillator2().setWaveType(osc2Wave.load(), osc2PW.load());
+            voice->getOscillator2().setTuning(osc2Tune.load(), osc2Fine.load());
+            voice->updateAmpEnv(osc1A.load(), osc1R.load(), osc2A.load(), osc2R.load());
+            //voice->updateADSR(ampAttack.load(), ampDecay.load(), ampSustain.load(), ampRelease.load());
             voice->updateFilter(filterType.load(), filterCutoff.load(), filterResonance.load());
             voice->updateFilterADSR(filterAttack.load(), filterDecay.load(), filterSustain.load(), filterRelease.load());
+            voice->updateGains(osc1Gain.load(), osc2Gain.load(), outputVolume);
 
         }
     }
@@ -246,18 +255,23 @@ juce::AudioProcessorValueTreeState::ParameterLayout Synth1AudioProcessor::create
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_TUNE",1}, "Osc1_Tune", coarseRange, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_FINE",1}, "Osc1_FineTune", fineRange, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_PW",1}, "Osc1_PulseWidth", juce::NormalisableRange<float>{0.0f, 0.9f,}, 0.0f));
-
+    // osc1 AR envelope
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_ATTACK",1}, "Osc1_Attack", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.1f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_RELEASE",1}, "Osc1_Release", juce::NormalisableRange<float>{0.01f, 3.0f,}, 0.5f));
+    //gain
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_GAIN",1}, "Osc1_Gain", juce::NormalisableRange<float>{0.01f, 0.5f,}, 0.25f));
+    
+    
     //oscillator 2
     params.push_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"OSC2_WAVE",1}, "Osc2_Waveform", juce::StringArray{"Sine","Saw","Square"}, 0));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_TUNE",1}, "Osc2_Tune", coarseRange, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_FINE",1}, "Osc2_FineTune", fineRange, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_PW",1}, "Osc2_PulseWidth", juce::NormalisableRange<float>{0.0f, 0.9f,}, 0.0f));
-
-    // amp ADSR
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"AMP_ATTACK",1}, "Attack", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.1f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"AMP_DECAY",1}, "Decay", juce::NormalisableRange<float>{0.01f, 1.0f,}, 0.1f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"AMP_SUSTAIN",1}, "Sustain", juce::NormalisableRange<float>{0.01f, 1.0f,}, 1.0f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"AMP_RELEASE",1}, "Release", juce::NormalisableRange<float>{0.01f, 3.0f,}, 0.5f));
+    // osc2 AR envelope
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_ATTACK",1}, "Osc2_Attack", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.1f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_RELEASE",1}, "Osc2_Release", juce::NormalisableRange<float>{0.01f, 3.0f,}, 0.5f));
+    //gain
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_GAIN",1}, "Osc2_Gain", juce::NormalisableRange<float>{0.01f, 0.5f,}, 0.25f));
     
     // Filter
     params.push_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"FILTER_TYPE",1}, "FilterType", juce::StringArray{"Low-Pass","Band-Pass","High-Pass"}, 0));
@@ -269,6 +283,9 @@ juce::AudioProcessorValueTreeState::ParameterLayout Synth1AudioProcessor::create
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"FILTER_DECAY",1}, "Filter Decay", juce::NormalisableRange<float>{0.01f, 1.0f,}, 0.1f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"FILTER_SUSTAIN",1}, "Filter Sustain", juce::NormalisableRange<float>{0.01f, 1.0f,}, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"FILTER_RELEASE",1}, "Filter Release", juce::NormalisableRange<float>{0.01f, 3.0f,}, 0.5f));
+    
+    //Volume
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"VOLUME",1}, "Output Volume", juce::NormalisableRange<float>{0.01f, 1.0f,}, 0.505f));
     
     return {params.begin(),params.end()};
     
