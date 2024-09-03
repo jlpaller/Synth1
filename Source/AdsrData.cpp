@@ -21,9 +21,9 @@ void AdsrData::updateADSR (const float attack, const float decay, const float su
 
 void ARData::updateAR(const float attack, const float release)
 {
-    AdsrParams.attack = attack;
-    AdsrParams.release = release;
-    AdsrParams.decay = 0.1f;
-    AdsrParams.sustain = 1.0f;
-    setParameters(AdsrParams);
+    ARParams.attack = attack;
+    ARParams.release = release;
+    ARParams.decay = 0.1f;
+    ARParams.sustain = 1.0f;
+    setParameters(ARParams);
 }

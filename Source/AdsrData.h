@@ -27,5 +27,5 @@ public:
     void updateAR(float attack, float release);
     
 private:
-    juce::ADSR::Parameters AdsrParams;
+    juce::ADSR::Parameters ARParams;
 };

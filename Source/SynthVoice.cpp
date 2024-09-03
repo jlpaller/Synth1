@@ -30,6 +30,8 @@ void SynthVoice::startNote (int midiNoteNumber, float velocity, juce::Synthesise
 void SynthVoice::stopNote (float velocity, bool allowTailOff)
 {
     //ampAdsr.noteOff();
+    osc1AmpEnv.noteOff();
+    osc2AmpEnv.noteOff();
     filterAdsr.noteOff();
     
     if (! allowTailOff || ( ! osc1AmpEnv.isActive() && ! osc2AmpEnv.isActive() ) || ! filterAdsr.isActive())
@@ -80,35 +82,37 @@ void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int 
     if (! isVoiceActive())
         return;
         
-    synthBuffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
+    osc1buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
     osc2buffer.setSize(outputBuffer.getNumChannels(), numSamples, false, false, true);
 
     //this next line just activates the filter adsr. doesn't actually do anything to the buffer
-    filterAdsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
-    synthBuffer.clear();
+    filterAdsr.applyEnvelopeToBuffer(osc1buffer, 0, osc1buffer.getNumSamples());
+    osc1buffer.clear();
     osc2buffer.clear();
     
     //creat buffers for each oscillator, then combine into one audio buffer
-    juce::dsp::AudioBlock<float> audioBlock1 {synthBuffer};
+    juce::dsp::AudioBlock<float> audioBlock1 {osc1buffer};
     juce::dsp::AudioBlock<float> audioBlock2 {osc2buffer};
     osc1.getNextAudioBlock(audioBlock1);
     osc2.getNextAudioBlock(audioBlock2);
 
-    gain1.process(juce::dsp::ProcessContextReplacing<float>(audioBlock1));
-    gain2.process(juce::dsp::ProcessContextReplacing<float>(audioBlock2));
-    
-    osc1AmpEnv.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
+    gain1.process(juce::dsp::ProcessContextReplacing<float> (audioBlock1));
+    osc1AmpEnv.applyEnvelopeToBuffer(osc1buffer, 0, osc1buffer.getNumSamples());
+
+    gain2.process(juce::dsp::ProcessContextReplacing<float> (audioBlock2));
     osc2AmpEnv.applyEnvelopeToBuffer(osc2buffer, 0, osc2buffer.getNumSamples());
     
-    audioBlock1.add(audioBlock2);
+    filter.process(osc1buffer);
+    filter.process(osc2buffer);
     
-    //ampAdsr.applyEnvelopeToBuffer(synthBuffer, 0, synthBuffer.getNumSamples());
-    filter.process(synthBuffer);
     outputGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock1));
+    outputGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock2));
+    
         
     for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
     {
-        outputBuffer.addFrom(channel, startSample, synthBuffer, channel, 0, numSamples);
+        outputBuffer.addFrom(channel, startSample, osc1buffer, channel, 0, numSamples);
+        outputBuffer.addFrom(channel, startSample, osc2buffer, channel, 0, numSamples);
         
         if (! osc1AmpEnv.isActive() && ! osc2AmpEnv.isActive())
             clearCurrentNote();

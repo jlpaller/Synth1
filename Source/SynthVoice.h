@@ -37,7 +37,7 @@ public:
 
     
 private:
-    juce::AudioBuffer<float> synthBuffer;
+    juce::AudioBuffer<float> osc1buffer;
     juce::AudioBuffer<float> osc2buffer;
     
     OscData osc1;

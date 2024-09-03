@@ -200,7 +200,7 @@ void Synth1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             //voice->updateADSR(ampAttack.load(), ampDecay.load(), ampSustain.load(), ampRelease.load());
             voice->updateFilter(filterType.load(), filterCutoff.load(), filterResonance.load());
             voice->updateFilterADSR(filterAttack.load(), filterDecay.load(), filterSustain.load(), filterRelease.load());
-            voice->updateGains(osc1Gain.load(), osc2Gain.load(), outputVolume);
+            voice->updateGains(osc1Gain.load(), osc2Gain.load(), outputVolume.load());
 
         }
     }
@@ -256,8 +256,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout Synth1AudioProcessor::create
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_FINE",1}, "Osc1_FineTune", fineRange, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_PW",1}, "Osc1_PulseWidth", juce::NormalisableRange<float>{0.0f, 0.9f,}, 0.0f));
     // osc1 AR envelope
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_ATTACK",1}, "Osc1_Attack", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.1f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_RELEASE",1}, "Osc1_Release", juce::NormalisableRange<float>{0.01f, 3.0f,}, 0.5f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_ATTACK",1}, "Osc1_Attack", juce::NormalisableRange<float>{0.01f, 4.0f,}, 0.1f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_RELEASE",1}, "Osc1_Release", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.5f));
     //gain
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC1_GAIN",1}, "Osc1_Gain", juce::NormalisableRange<float>{0.0f, 0.5f,}, 0.25f));
     
@@ -268,8 +268,8 @@ juce::AudioProcessorValueTreeState::ParameterLayout Synth1AudioProcessor::create
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_FINE",1}, "Osc2_FineTune", fineRange, 1.0f));
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_PW",1}, "Osc2_PulseWidth", juce::NormalisableRange<float>{0.0f, 0.9f,}, 0.0f));
     // osc2 AR envelope
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_ATTACK",1}, "Osc2_Attack", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.1f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_RELEASE",1}, "Osc2_Release", juce::NormalisableRange<float>{0.01f, 3.0f,}, 0.5f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_ATTACK",1}, "Osc2_Attack", juce::NormalisableRange<float>{0.01f, 4.0f,}, 0.1f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_RELEASE",1}, "Osc2_Release", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.5f));
     //gain
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_GAIN",1}, "Osc2_Gain", juce::NormalisableRange<float>{0.0f, 0.5f,}, 0.25f));
     
