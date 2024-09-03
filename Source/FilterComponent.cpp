@@ -12,15 +12,15 @@
 #include "FilterComponent.h"
 
 //==============================================================================
-FilterComponent::FilterComponent(juce::AudioProcessorValueTreeState& valueTree, juce::String filterTypeId, juce::String filterCutoffId, juce::String filterResonanceId)
+FilterComponent::FilterComponent(juce::AudioProcessorValueTreeState& valueTree, juce::String name, juce::String filterCutoffId, juce::String filterResonanceId)
 {
     
-    moduleName = "Filter";
+    moduleName = name;
 
     
     setSliderWithLabel(filterCutoffSlider, filterCutoffLabel, valueTree, filterCutoffId, filterCutoffAttachment);
     setSliderWithLabel(filterResonanceSlider, filterResonanceLabel, valueTree, filterResonanceId, filterResonanceAttachment);
-    setComboBoxWithLabel(filterTypeComboBox, filterTypeLabel, valueTree, filterTypeId, filterTypeAttachment, {"Low-Pass", "Band-Pass", "High-Pass"});
+    //setComboBoxWithLabel(filterTypeComboBox, filterTypeLabel, valueTree, filterTypeId, filterTypeAttachment, {"Low-Pass", "Band-Pass", "High-Pass"});
     
 }
 
@@ -32,18 +32,18 @@ FilterComponent::~FilterComponent()
 
 void FilterComponent::resized()
 {
-    const auto startY = 55;
-    const auto sliderWidth = 100;
-    const auto sliderHeight = 90;
+    const auto bounds = getLocalBounds().reduced(10);
+    const auto padding = 10;
+    const auto knobDiameter = std::min(bounds.getWidth()-padding, bounds.getHeight()/3);
     const auto labelYOffset = 20;
     const auto labelHeight = 20;
+    const auto startY = 55;
     
-    filterTypeComboBox.setBounds(10, startY + 5, 90, 30);
-    filterTypeLabel.setBounds(10, startY - labelYOffset , 90, labelHeight);
     
-    filterCutoffSlider.setBounds(filterTypeComboBox.getRight(), startY, sliderWidth, sliderHeight);
-    filterCutoffLabel.setBounds(filterCutoffSlider.getX(), filterCutoffSlider.getY() - labelYOffset, filterCutoffSlider.getWidth(), labelHeight);
+    filterCutoffSlider.setBounds(bounds.getWidth()/2 - knobDiameter/2, startY, knobDiameter, knobDiameter);
+    filterCutoffLabel.setBounds(filterCutoffSlider.getX(), filterCutoffSlider.getY() - labelYOffset, knobDiameter, labelHeight);
     
-    filterResonanceSlider.setBounds(filterCutoffSlider.getRight(), startY, sliderWidth, sliderHeight);
-    filterResonanceLabel.setBounds(filterResonanceSlider.getX(), filterResonanceSlider.getY() - labelYOffset, filterResonanceSlider.getWidth(), labelHeight);
+    filterResonanceSlider.setBounds(filterCutoffSlider.getX(), bounds.getHeight() - knobDiameter - padding + labelHeight, knobDiameter, knobDiameter);
+    filterResonanceLabel.setBounds(filterResonanceSlider.getX(), filterResonanceSlider.getY() - labelYOffset, knobDiameter, labelHeight);
+
 }

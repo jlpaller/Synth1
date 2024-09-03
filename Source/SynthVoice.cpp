@@ -58,13 +58,14 @@ void SynthVoice::prepareToPlay (double sampleRate, int samplesPerBlock, int outp
     osc2.prepareToPlay(spec);
     osc1AmpEnv.setSampleRate(sampleRate);
     osc2AmpEnv.setSampleRate(sampleRate);
-    filter.prepareToPlay(sampleRate, samplesPerBlock, outputChannels);
+    LPF.prepareToPlay(sampleRate, samplesPerBlock, outputChannels);
+    HPF.prepareToPlay(sampleRate, samplesPerBlock, outputChannels);
     filterAdsr.setSampleRate(sampleRate);
     gain1.prepare(spec);
     gain2.prepare(spec);
     outputGain.prepare(spec);
-        
     isPrepared = true;
+    
 }
 
 void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int startSample, int numSamples)
@@ -103,18 +104,20 @@ void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int 
     {
         outputBuffer.addFrom(channel, startSample, osc1buffer, channel, 0, numSamples);
         outputBuffer.addFrom(channel, startSample, osc2buffer, channel, 0, numSamples);
-        filter.process(outputBuffer);
         
         if (! osc1AmpEnv.isActive() && ! osc2AmpEnv.isActive())
             clearCurrentNote();
     }
     
+    LPF.process(outputBuffer);
+    HPF.process(outputBuffer);
+    
 }
 
-void SynthVoice::updateFilter(const int filterType, const float cutoff, const float resonance)
+void SynthVoice::updateFilter(FilterData& filter, const float cutoff, const float resonance)
 {
     float modulator = filterAdsr.getNextSample();
-    filter.updateParameters(filterType, cutoff, resonance, modulator);
+    filter.setTone(cutoff, resonance, modulator);
 }
 
 void SynthVoice::updateFilterADSR(const float attack, const float decay, const float sustain, const float release)

@@ -185,9 +185,10 @@ void Synth1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             
             auto& osc2Gain = *valueTree.getRawParameterValue(juce::StringRef("OSC2_GAIN"));
             
-            auto& filterType = *valueTree.getRawParameterValue(juce::StringRef("FILTER_TYPE"));
-            auto& filterCutoff = *valueTree.getRawParameterValue(juce::StringRef("FILTER_CUTOFF"));
-            auto& filterResonance = *valueTree.getRawParameterValue(juce::StringRef("FILTER_RESONANCE"));
+            auto& LPfilterCutoff = *valueTree.getRawParameterValue(juce::StringRef("LPF_CUTOFF"));
+            auto& LPfilterResonance = *valueTree.getRawParameterValue(juce::StringRef("LPF_RESONANCE"));
+            auto& HPfilterCutoff = *valueTree.getRawParameterValue(juce::StringRef("HPF_CUTOFF"));
+            auto& HPfilterResonance = *valueTree.getRawParameterValue(juce::StringRef("HPF_RESONANCE"));
             
             auto& filterAttack = *valueTree.getRawParameterValue(juce::StringRef("FILTER_ATTACK"));
             auto& filterDecay = *valueTree.getRawParameterValue(juce::StringRef("FILTER_DECAY"));
@@ -201,7 +202,8 @@ void Synth1AudioProcessor::processBlock (juce::AudioBuffer<float>& buffer, juce:
             voice->getOscillator2().setTuning(osc2Tune.load(), osc2Fine.load());
             voice->getOsc1ADSR().updateADSR(osc1A.load(), osc1D.load(), osc1S.load(), osc1R.load());
             voice->getOsc2ADSR().updateADSR(osc2A.load(), osc2D.load(), osc2S.load(), osc2R.load());
-            voice->updateFilter(filterType.load(), filterCutoff.load(), filterResonance.load());
+            voice->updateFilter(voice->getLPF(), LPfilterCutoff.load(), LPfilterResonance.load());
+            voice->updateFilter(voice->getHPF(), HPfilterCutoff.load(), HPfilterResonance.load());
             voice->updateFilterADSR(filterAttack.load(), filterDecay.load(), filterSustain.load(), filterRelease.load());
             voice->updateGains(osc1Gain.load(), osc2Gain.load(), outputVolume.load());
 
@@ -280,10 +282,11 @@ juce::AudioProcessorValueTreeState::ParameterLayout Synth1AudioProcessor::create
     //gain
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"OSC2_GAIN",1}, "Osc2_Gain", juce::NormalisableRange<float>{0.0f, 0.5f,}, 0.25f));
     
-    // Filter
-    params.push_back(std::make_unique<juce::AudioParameterChoice>(juce::ParameterID{"FILTER_TYPE",1}, "FilterType", juce::StringArray{"Low-Pass","Band-Pass","High-Pass"}, 0));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"FILTER_CUTOFF",1}, "FilterCutoff", juce::NormalisableRange<float>{20.0f, 20000.0f, 0.1f, 0.6f}, 20000.0f));
-    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"FILTER_RESONANCE",1}, "FilterResonance", juce::NormalisableRange<float>{0.1f, 5.0f,}, 1.0f));
+    // Filters
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"LPF_CUTOFF",1}, "LPFCutoff", juce::NormalisableRange<float>{20.0f, 20000.0f, 0.1f, 0.6f}, 20000.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"LPF_RESONANCE",1}, "LPFResonance", juce::NormalisableRange<float>{0.1f, 5.0f,}, 0.1f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"HPF_CUTOFF",1}, "HPFCutoff", juce::NormalisableRange<float>{20.0f, 20000.0f, 0.1f, 0.6f}, 20.0f));
+    params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"HPF_RESONANCE",1}, "HPFResonance", juce::NormalisableRange<float>{0.1f, 5.0f,}, 0.1f));
 
     // filter ADSR
     params.push_back(std::make_unique<juce::AudioParameterFloat>(juce::ParameterID{"FILTER_ATTACK",1}, "Filter Attack", juce::NormalisableRange<float>{0.01f, 2.0f,}, 0.1f));

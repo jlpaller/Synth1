@@ -35,7 +35,8 @@ private:
     OscComponent osc2;
     AdsrComponent osc1Env;
     AdsrComponent osc2Env;
-    FilterComponent filter;
+    FilterComponent LPF;
+    FilterComponent HPF;
     AdsrComponent filterAdsr;
     VolumeComponent volume;
 

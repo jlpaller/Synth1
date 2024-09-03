@@ -10,6 +10,11 @@
 
 #include "FilterData.h"
 
+FilterData::FilterData(const int filterType)
+{
+    Type = filterType;
+}
+
 void FilterData::prepareToPlay(double sampleRate, int samplesPerBlock, int numChannels)
 {
     filter.reset();
@@ -21,6 +26,8 @@ void FilterData::prepareToPlay(double sampleRate, int samplesPerBlock, int numCh
     
     filter.prepare(spec);
     isPrepared = true;
+    
+    setType(Type);
 }
 
 void FilterData::process(juce::AudioBuffer<float>& buffer)
@@ -31,23 +38,34 @@ void FilterData::process(juce::AudioBuffer<float>& buffer)
     filter.process(juce::dsp::ProcessContextReplacing<float>(block));
 }
 
-void FilterData::updateParameters(const int filterType, const float frequency, const float resonance, const float modulator)
+void FilterData::setType(const int filterType)
 {
-    switch (filterType)
+    if (filterType != Type)
     {
-        case 0:
-            filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
-            break;
-            
-        case 1:
-            filter.setType(juce::dsp::StateVariableTPTFilterType::bandpass);
-            break;
-            
-        case 2:
-            filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
-            break;
+        switch (filterType)
+        {
+            case 0:
+                filter.setType(juce::dsp::StateVariableTPTFilterType::lowpass);
+                break;
+                
+            case 1:
+                filter.setType(juce::dsp::StateVariableTPTFilterType::bandpass);
+                break;
+                
+            case 2:
+                filter.setType(juce::dsp::StateVariableTPTFilterType::highpass);
+                break;
+        }
+        
+        Type = filterType;
     }
     
+
+        
+}
+
+void FilterData::setTone(const float frequency, const float resonance, const float modulator)
+{
     //make sure cutoff is between 20 and 20kHz
     float modFreq = std::fmin(std::fmax(frequency * modulator, 20.0f), 20000.0f);
     

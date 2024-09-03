@@ -27,9 +27,12 @@ public:
     void prepareToPlay (double sampleRate, int samplesPerBlock, int outputChannels);
     void renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int startSample, int numSamples) override;
     
-    void updateFilter(const int filterType, const float cutoff, const float resonance);
+    void updateFilter(FilterData& filter, const float cutoff, const float resonance);
     void updateFilterADSR(float attack, float decay, float sustain, float release);
     void updateGains(const float gain1, const float gain2, const float outputGain);
+    
+    FilterData& getHPF() { return HPF; }
+    FilterData& getLPF() { return LPF; }
     
     OscData& getOscillator1() { return osc1; }
     OscData& getOscillator2() { return osc2; }
@@ -49,7 +52,8 @@ private:
     juce::dsp::Gain<float> gain1;
     juce::dsp::Gain<float> gain2;
     
-    FilterData filter;
+    FilterData LPF = FilterData(0);
+    FilterData HPF = FilterData(2);
     AdsrData filterAdsr;
 
     juce::dsp::Gain<float> outputGain;

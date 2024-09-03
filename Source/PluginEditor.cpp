@@ -17,7 +17,8 @@ Synth1AudioProcessorEditor::Synth1AudioProcessorEditor (Synth1AudioProcessor& p)
 , osc2("Oscillator 2", audioProcessor.valueTree, "OSC2_WAVE", "OSC2_TUNE", "OSC2_FINE", "OSC2_PW", "OSC2_GAIN")
 , osc1Env("Osc 1 Amp Env", audioProcessor.valueTree, "OSC1_ATTACK", "OSC1_DECAY", "OSC1_SUSTAIN", "OSC1_RELEASE")
 , osc2Env("Osc 2 Amp Env", audioProcessor.valueTree, "OSC2_ATTACK", "OSC2_DECAY", "OSC2_SUSTAIN", "OSC2_RELEASE")
-, filter(audioProcessor.valueTree, "FILTER_TYPE", "FILTER_CUTOFF", "FILTER_RESONANCE")
+, LPF(audioProcessor.valueTree, "Low Pass", "LPF_CUTOFF", "LPF_RESONANCE")
+, HPF(audioProcessor.valueTree, "High Pass", "HPF_CUTOFF", "HPF_RESONANCE")
 , filterAdsr("Filter Envelope", audioProcessor.valueTree, "FILTER_ATTACK", "FILTER_DECAY", "FILTER_SUSTAIN", "FILTER_RELEASE")
 , volume("Volume", audioProcessor.valueTree, "VOLUME")
 {
@@ -28,7 +29,8 @@ Synth1AudioProcessorEditor::Synth1AudioProcessorEditor (Synth1AudioProcessor& p)
     addAndMakeVisible(osc2);
     addAndMakeVisible(osc1Env);
     addAndMakeVisible(osc2Env);
-    addAndMakeVisible(filter);
+    addAndMakeVisible(LPF);
+    addAndMakeVisible(HPF);
     addAndMakeVisible(filterAdsr);
     addAndMakeVisible(volume);
     
@@ -50,9 +52,10 @@ void Synth1AudioProcessorEditor::resized()
 {
     const auto paddingX = 5; // pad from the left
     const auto paddingY = 10; // pad from the top
-    const auto paddingY2 = 300; // pad from the top for second level
-    const auto moduleWidth = 250;
-    const auto moduleHeight = 230;
+    const auto moduleWidth = 280;
+    const auto moduleHeight = 250;
+    const auto paddingY2 = moduleHeight + paddingY*2; // pad from the top for second level
+
     
     //row 1
     osc1.setBounds(paddingX, paddingY, moduleWidth, moduleHeight);
@@ -61,8 +64,9 @@ void Synth1AudioProcessorEditor::resized()
     osc2Env.setBounds(osc2.getRight(), paddingY, moduleWidth, moduleHeight);
 
     //row 2
-    filter.setBounds(paddingX, paddingY2, moduleWidth, moduleHeight);
-    filterAdsr.setBounds(filter.getRight(), paddingY2, moduleWidth, moduleHeight);
+    LPF.setBounds(paddingX, paddingY2, moduleWidth/2, moduleHeight);
+    HPF.setBounds(LPF.getRight(), paddingY2, moduleWidth/2, moduleHeight);
+    filterAdsr.setBounds(HPF.getRight(), paddingY2, moduleWidth, moduleHeight);
     volume.setBounds(filterAdsr.getRight(), paddingY2, moduleWidth/3, moduleHeight);
 
 }
