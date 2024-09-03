@@ -30,7 +30,7 @@ AdsrComponent::~AdsrComponent()
 
 void AdsrComponent::resized()
 {
-    const auto bounds = getLocalBounds().reduced (10);
+    const auto bounds = getLocalBounds().reduced(10);
     const auto padding = 10;
     const auto sliderWidth = bounds.getWidth() / 4 - padding;
     const auto sliderHeight = bounds.getHeight() - 45;

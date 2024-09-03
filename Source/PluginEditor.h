@@ -33,9 +33,8 @@ private:
     Synth1AudioProcessor& audioProcessor;
     OscComponent osc1;
     OscComponent osc2;
-    //AdsrComponent adsr;
-    ARComponent osc1Env;
-    ARComponent osc2Env;
+    AdsrComponent osc1Env;
+    AdsrComponent osc2Env;
     FilterComponent filter;
     AdsrComponent filterAdsr;
     VolumeComponent volume;

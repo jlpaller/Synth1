@@ -23,13 +23,11 @@ void SynthVoice::startNote (int midiNoteNumber, float velocity, juce::Synthesise
 
     osc1AmpEnv.noteOn();
     osc2AmpEnv.noteOn();
-    //ampAdsr.noteOn();
     filterAdsr.noteOn();
 }
 
 void SynthVoice::stopNote (float velocity, bool allowTailOff)
 {
-    //ampAdsr.noteOff();
     osc1AmpEnv.noteOff();
     osc2AmpEnv.noteOff();
     filterAdsr.noteOff();
@@ -60,16 +58,11 @@ void SynthVoice::prepareToPlay (double sampleRate, int samplesPerBlock, int outp
     osc2.prepareToPlay(spec);
     osc1AmpEnv.setSampleRate(sampleRate);
     osc2AmpEnv.setSampleRate(sampleRate);
-    //ampAdsr.setSampleRate(sampleRate);
     filter.prepareToPlay(sampleRate, samplesPerBlock, outputChannels);
     filterAdsr.setSampleRate(sampleRate);
     gain1.prepare(spec);
     gain2.prepare(spec);
     outputGain.prepare(spec);
-
-    gain1.setGainLinear(1.0f);
-    gain2.setGainLinear(1.0f);    
-    outputGain.setGainLinear(0.2f);
         
     isPrepared = true;
 }
@@ -87,6 +80,7 @@ void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int 
 
     //this next line just activates the filter adsr. doesn't actually do anything to the buffer
     filterAdsr.applyEnvelopeToBuffer(osc1buffer, 0, osc1buffer.getNumSamples());
+    
     osc1buffer.clear();
     osc2buffer.clear();
     
@@ -97,33 +91,24 @@ void SynthVoice::renderNextBlock (juce::AudioBuffer< float > &outputBuffer, int 
     osc2.getNextAudioBlock(audioBlock2);
 
     gain1.process(juce::dsp::ProcessContextReplacing<float> (audioBlock1));
-    osc1AmpEnv.applyEnvelopeToBuffer(osc1buffer, 0, osc1buffer.getNumSamples());
-
     gain2.process(juce::dsp::ProcessContextReplacing<float> (audioBlock2));
+
+    osc1AmpEnv.applyEnvelopeToBuffer(osc1buffer, 0, osc1buffer.getNumSamples());
     osc2AmpEnv.applyEnvelopeToBuffer(osc2buffer, 0, osc2buffer.getNumSamples());
-    
-    filter.process(osc1buffer);
-    filter.process(osc2buffer);
     
     outputGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock1));
     outputGain.process(juce::dsp::ProcessContextReplacing<float>(audioBlock2));
-    
         
     for (int channel = 0; channel < outputBuffer.getNumChannels(); ++channel)
     {
         outputBuffer.addFrom(channel, startSample, osc1buffer, channel, 0, numSamples);
         outputBuffer.addFrom(channel, startSample, osc2buffer, channel, 0, numSamples);
+        filter.process(outputBuffer);
         
         if (! osc1AmpEnv.isActive() && ! osc2AmpEnv.isActive())
             clearCurrentNote();
     }
     
-}
-
-void SynthVoice::updateAmpEnv(const float attack1, const float release1, const float attack2, const float release2)
-{
-    osc1AmpEnv.updateAR(attack1, release1);
-    osc2AmpEnv.updateAR(attack2, release2);
 }
 
 void SynthVoice::updateFilter(const int filterType, const float cutoff, const float resonance)
